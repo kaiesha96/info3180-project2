@@ -46,7 +46,7 @@ def register():
                 
                 photo       = form.profile_photo.data
                 filename    = secure_filename(form.email.data.split("@")[0]+"."+photo.filename.split(".")[-1])
-                db.session.add(Users(username = form.username.data, password = form.password.data, first_name = form.first_name.data, last_name = form.last_name.data, email = form.email.data, photo = filename, location = form.location.data, bio = form.biography.data))
+                db.session.add(Users(username = form.username.data, password = form.password.data, first_name = form.first_name.data, last_name = form.last_name.data, email = form.email.data, profile_photo = filename, location = form.location.data, biography = form.biography.data))
                 photo.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
                 db.session.commit()
                 return "Successfully Added"
@@ -67,39 +67,40 @@ def register():
 # 		return dumps({'message' : '200-OK', 'error' : 'USER EXIST'})
 # 	return dumps({'message':'400-ERROR', 'error' : '0X51427'})
 
-	
-@app.route("/login", methods=["GET", "POST"])
+
+@app.route('/api/auth/login', methods=['POST', 'GET'])
 def login():
     form = LoginForm()
-    if request.method == "POST":
-        # change this to actually validate the entire form submission
-        # and not just one field
-        if form.username.data:
-            # Get the username and password values from the form.
-
-            # using your model, query database for a user based on the username
-            # and password submitted
-            # store the result of that query to a `user` variable so it can be
-            # passed to the login_user() method.
-
-            # get user id, load into session
+    # user = Users()
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        user = Users.query.filter_by(username=username,password=password).first()
+        if user:
             login_user(user)
-
-            # remember to flash a message to the user
-            return redirect(url_for("home"))  # they should be redirected to a secure-page route instead
+            flash("Logged in successfully.")
+            return redirect(url_for("about"))
+        else:
+            flash("Incorrect Username or Password!")
     return render_template("login.html", form=form)
-
 
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
 @login_manager.user_loader
-def load_user(id):
-    return UserProfile.query.get(int(id))
+def load_user(user_id):
+    return Users.query.get(int(user_id))
 
 ###
 # The functions below should be applicable to all Flask apps.
 ###
 
+@app.route('/api/auth/logout', methods=['GET'])
+@login_required
+def logout():
+    logout_user()
+    flash("Logged out successfully.")
+    return redirect(url_for('home')) 
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):

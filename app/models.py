@@ -10,7 +10,18 @@ class Posts(db.Model):
     photo   = db.Column(db.String())
     caption = db.Column(db.String())
     created_on = db.Column(db.String())
+
     
+class Likes(db.Model):
+    likes_id        = db.Column(db.Integer, primary_key=True)
+    user_id         = db.Column(db.Integer)
+    post_id         = db.Column(db.Integer)
+    
+class Follows(db.Model):
+    follow_id       = db.Column(db.Integer, primary_key=True)
+    user_id         = db.Column(db.Integer)
+    follower_id     = db.Column(db.Integer)
+
 class Users(db.Model):
     user_id	        = db.Column(db.Integer, primary_key=True)
     username		= db.Column(db.String())
@@ -24,26 +35,16 @@ class Users(db.Model):
     joined_on	    = db.Column(db.String())
     
     def __init__(self, username, password, first_name, last_name, email, photo, location, bio):
-		self.userid 		= long(time())
-		self.email		 	= email
-		self.first_name 	= first_name
-		self.last_name 		= last_name
-		self.username 		= username
-		self.password 		= generate_password_hash(password)
-		self.profile_photo  = photo
+ 		self.user_id 		= long(time())
+ 		self.email		 	= email
+ 		self.first_name 	= first_name
+ 		self.last_name 		= last_name
+ 		self.username 		= username
+ 		self.password 		= generate_password_hash(password)
+ 		self.profile_photo  = photo
 		self.biography 		= bio
 		self.location		= location
-		self.joined_on	= "{0:%A}, {0:%B} {0:%d}, 20{0:%y}".format(date.today())
-    
-class Likes(db.Model):
-    likes_id        = db.Column(db.Integer, primary_key=True)
-    user_id         = db.Column(db.Integer)
-    post_id         = db.Column(db.Integer)
-    
-class Follows(db.Model):
-    follow_id       = db.Column(db.Integer, primary_key=True)
-    user_id         = db.Column(db.Integer)
-    follower_id     = db.Column(db.Integer)
+ 		self.joined_on	= "{0:%A}, {0:%B} {0:%d}, 20{0:%y}".format(date.today())
 
     def is_authenticated(self):
         return True
@@ -56,9 +57,9 @@ class Follows(db.Model):
 
     def get_id(self):
         try:
-            return unicode(self.id)  # python 2 support
+            return unicode(self.user_id)  # python 2 support
         except NameError:
-            return str(self.id)  # python 3 support
+            return str(self.user_id)  # python 3 support
 
     def __repr__(self):
         return '<User %r>' % (self.username)
