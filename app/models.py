@@ -5,47 +5,45 @@ from flask_login import UserMixin, LoginManager
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Posts(db.Model):
-    post_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    photo   = db.Column(db.String())
-    caption = db.Column(db.String())
-    created_on = db.Column(db.String())
 
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    photo   = db.Column(db.String(255))
+    caption = db.Column(db.String(80))
+    created_on = db.Column(db.String(80))
     
-class Likes(db.Model):
-    likes_id        = db.Column(db.Integer, primary_key=True)
-    user_id         = db.Column(db.Integer)
-    post_id         = db.Column(db.Integer)
     
-class Follows(db.Model):
-    follow_id       = db.Column(db.Integer, primary_key=True)
-    user_id         = db.Column(db.Integer)
-    follower_id     = db.Column(db.Integer)
+    def __init__(self, id, user_id, photo, caption, created_on):
+        self.user_id = user_id
+        self.photo = photo
+        self.caption = caption
+        self.created_on = created_on
+
 
 class Users(db.Model):
-    user_id	        = db.Column(db.Integer, primary_key=True)
-    username		= db.Column(db.String())
-    password		= db.Column(db.String())
-    email       	= db.Column(db.String())
-    first_name  	= db.Column(db.String())
-    last_name		= db.Column(db.String())
-    profile_photo	= db.Column(db.String())
-    biography	  	= db.Column(db.String())
-    location	  	= db.Column(db.String())
-    joined_on	    = db.Column(db.String())
-    
-    def __init__(self, username, password, first_name, last_name, email, photo, location, bio):
- 		self.user_id 		= long(time())
- 		self.email		 	= email
- 		self.first_name 	= first_name
- 		self.last_name 		= last_name
- 		self.username 		= username
- 		self.password 		= generate_password_hash(password)
- 		self.profile_photo  = photo
-		self.biography 		= bio
-		self.location		= location
- 		self.joined_on	= "{0:%A}, {0:%B} {0:%d}, 20{0:%y}".format(date.today())
+    user_id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(80))
+    password = db.Column(db.String(80))
+    firstname = db.Column(db.String(80))
+    lastname = db.Column(db.String(80))
+    email = db.Column(db.String(80))
+    location=db.Column(db.String(80))
+    biography=db.Column(db.String(255))
+    profile_photo=db.Column(db.String(255))
+    joined_on=db.Column(db.String(80))
 
+    
+    def __init__(self, username, password, firstname, lastname, email, location, biography, profile_photo, joined_on):
+        self.username = username
+        self.password = generate_password_hash(password)
+        self.firstname = firstname
+        self.lastname = lastname
+        self.email = email
+        self.location = location
+        self.biography = biography
+        self.profile_photo = profile_photo
+        self.joined_on = "{0:%A}, {0:%B} {0:%d}, 20{0:%y}".format(date.today())
+    
     def is_authenticated(self):
         return True
 
@@ -62,4 +60,25 @@ class Users(db.Model):
             return str(self.user_id)  # python 3 support
 
     def __repr__(self):
-        return '<User %r>' % (self.username)
+        return '<User %r>' % (self.username)    
+
+    
+class Likes(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, unique=True)
+    post_id = db.Column(db.Integer, unique=True)
+    
+    def __init__(self,post_id,user_id):
+        self.user_id = user_id
+        self.post_id = post_id
+    
+class Follows(db.Model):
+    id       = db.Column(db.Integer, primary_key=True)
+    user_id         = db.Column(db.Integer)
+    follower_id     = db.Column(db.Integer)
+
+    def __init__(self,user_id, follower_id):
+        self.user_id=user_id
+        self.follower_id=follower_id
+
+    
